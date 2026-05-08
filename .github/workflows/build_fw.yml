@@ -19,43 +19,12 @@ on:
     paths: *trigger-paths
 
 jobs:
-  test:
-    name: Run tests
-    runs-on: ubuntu-latest
-    if: |
-      github.event_name != 'pull_request' ||
-      !contains(github.event.pull_request.labels.*.name, 'ci: skip-fw')
-    strategy:
-      matrix:
-        target:
-          - x12s
-    container:
-      image: ghcr.io/edgetx/edgetx-dev:latest
-      volumes:
-        - ${{ github.workspace }}:/src
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v6
-        with:
-          submodules: recursive
-
-      - name: Test ${{ matrix.target }}
-        env:
-          FLAVOR: ${{ matrix.target }}
-          CMAKE_BUILD_PARALLEL_LEVEL: 4
-        run: cmake -B build -DPCB=X12S -DGIMBAL=FLY_SKY -DPCBS_TO_BUILD=X12S
-
   build:
-    name: Run builds
-    needs: test
+    name: Build Horus X12S Firmware
     runs-on: ubuntu-latest
-    if: |
-      github.event_name != 'pull_request' ||
-      !contains(github.event.pull_request.labels.*.name, 'ci: skip-fw')
     strategy:
       matrix:
-        target:
-          - x12s
+        target: [x12s]
     container:
       image: ghcr.io/edgetx/edgetx-dev:latest
       volumes:
@@ -66,35 +35,16 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build ${{ matrix.target }}
-        env:
-          FLAVOR: ${{ matrix.target }}
-          CMAKE_BUILD_PARALLEL_LEVEL: 4
-        run: cmake -B build -DPCB=X12S -DGIMBAL=FLY_SKY -DPCBS_TO_BUILD=X12S && cmake --build build -j4
+      - name: Compile Custom Firmware
+        run: |
+          cmake -B build -DPCB=X12S -DGIMBAL=FLY_SKY -DPCBS_TO_BUILD=X12S
+          cmake --build build -j4 --target firmware
+          find build -name "*.bin" -exec cp {} . \;
 
-      - name: Upload ${{ matrix.target }}
+      - name: Upload Firmware Binary
         uses: actions/upload-artifact@v7
         with:
-          name: firmware-${{ matrix.target }}
-          path: |
-            fw.json
-            LICENSE
-            **/*.bin
-          retention-days: 15
+          name: edgetx-x12s-flysky-gimbals
+          path: "*.bin"
+          retention-days: 7
           if-no-files-found: error
-
-  package:
-    name: Package firmwares
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Compose release filename
-        run: echo "artifact_name=edgetx-firmware-${GITHUB_REF##*/}" >> $GITHUB_ENV
-
-      - name: Merge firmware artifact packages
-        uses: actions/upload-artifact/merge@v7
-        with:
-          name: "${{ env.artifact_name }}"
-          pattern: firmware-*
-          delete-merged: true
-          retention-days: 15
