@@ -79,7 +79,7 @@ jobs:
           path: |
             fw.json
             LICENSE
-            build/*.bin
+            **/*.bin
           retention-days: 15
           if-no-files-found: error
 
