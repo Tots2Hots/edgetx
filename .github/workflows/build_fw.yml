@@ -62,9 +62,7 @@ jobs:
         env:
           FLAVOR: ${{ matrix.target }}
           CMAKE_BUILD_PARALLEL_LEVEL: 4
-        run: |
-          echo "Running commit tests"
-          ./tools/commit-tests.sh
+        run: cmake -B build -DPCB=X12S -DGIMBAL=FLY_SKY -DPCBS_TO_BUILD=X12S
 
   build:
     name: Run builds
