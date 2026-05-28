@@ -202,28 +202,33 @@
   #endif
 #endif
 
-#if defined(AUX2_SERIAL)
+// --- FLYSKY DIGITAL GIMBAL AUX2 (UART4) OVERRIDE ---
 #if defined(PCBX12S)
-  #define AUX2_SERIAL_USART                    UART4
-  #define AUX2_SERIAL_USART_IRQn               UART4_IRQn
-  #define AUX2_SERIAL_TX_GPIO                  GPIO_PIN(GPIOA, 0) // PA.00
-  #define AUX2_SERIAL_RX_GPIO                  GPIO_PIN(GPIOA, 1) // PA.01
-  #define AUX2_SERIAL_DMA_RX                   DMA1
-  #define AUX2_SERIAL_DMA_RX_STREAM            LL_DMA_STREAM_2
-  #define AUX2_SERIAL_DMA_RX_CHANNEL           LL_DMA_CHANNEL_4
-#else
+  // 1. Completely disable the stock AUX2 / GPS assignment to prevent conflicts
+  #undef AUX2_SERIAL_USART
+  #undef AUX2_SERIAL_USART_IRQn
+  
+  // 2. Remap UART4 (Pins PA00 and PA01) straight to your digital gimbals
+  #define PIN_GIMBAL_SERIAL_PORT              UART4
+  #define PIN_GIMBAL_SERIAL_USART_IRQn        UART4_IRQn
+  #define PIN_GIMBAL_SERIAL_TX_GPIO           GPIO_PIN(GPIOA, 0) // PA.00
+  #define PIN_GIMBAL_SERIAL_RX_GPIO           GPIO_PIN(GPIOA, 1) // PA.01
+  #define TYPE_GIMBAL_FLYSKY_DIGITAL          1
+#endif
+
+// --- STOCK RESIDUAL FALLBACKS (DO NOT REMOVE) ---
+#if defined(AUX2_SERIAL) && !defined(PCBX12S)
   #define AUX2_SERIAL_USART                    USART6
   #define AUX2_SERIAL_USART_IRQn               USART6_IRQn
   #define AUX2_SERIAL_GPIO                     GPIOG
-  #define AUX2_SERIAL_TX_GPIO                  GPIO_PIN(GPIOG, 14) // PG.14
-  #define AUX2_SERIAL_RX_GPIO                  GPIO_PIN(GPIOG, 9)  // PG.09
+  #define AUX2_SERIAL_TX_GPIO                  GPIO_PIN(GPIOG, 14)
+  #define AUX2_SERIAL_RX_GPIO                  GPIO_PIN(GPIOG, 9)
   #define AUX2_SERIAL_DMA_RX                   DMA2
-  #define AUX2_SERIAL_DMA_RX_STREAM            LL_DMA_STREAM_1 // or stream 2
+  #define AUX2_SERIAL_DMA_RX_STREAM            LL_DMA_STREAM_1
   #define AUX2_SERIAL_DMA_RX_CHANNEL           LL_DMA_CHANNEL_5
   #if !defined(RADIO_T18)
-    #define AUX2_SERIAL_PWR_GPIO                 GPIO_PIN(GPIOB, 0) // PB.00
+    #define AUX2_SERIAL_PWR_GPIO                 GPIO_PIN(GPIOB, 0)
   #endif
-#endif
 #endif
 
 // Telemetry
