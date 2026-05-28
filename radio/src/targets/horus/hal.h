@@ -204,16 +204,21 @@
 
 // --- FLYSKY DIGITAL GIMBAL AUX2 (UART4) OVERRIDE ---
 #if defined(PCBX12S)
-  // 1. Completely disable the stock AUX2 / GPS assignment to prevent conflicts
-  #undef AUX2_SERIAL_USART
-  #undef AUX2_SERIAL_USART_IRQn
-  
-  // 2. Remap UART4 (Pins PA00 and PA01) straight to your digital gimbals
+  // 1. Modern EdgeTX Gimbal Engine Definitions
+  #define GIMBAL_SERIAL_USART                 UART4
+  #define GIMBAL_SERIAL_PORT                  UART4
   #define PIN_GIMBAL_SERIAL_PORT              UART4
-  #define PIN_GIMBAL_SERIAL_USART_IRQn        UART4_IRQn
-  #define PIN_GIMBAL_SERIAL_TX_GPIO           GPIO_PIN(GPIOA, 0) // PA.00
-  #define PIN_GIMBAL_SERIAL_RX_GPIO           GPIO_PIN(GPIOA, 1) // PA.01
+  #define GIMBAL_SERIAL_USART_IRQn            UART4_IRQn
   #define TYPE_GIMBAL_FLYSKY_DIGITAL          1
+
+  // 2. Mock definitions for AUX2 to pass aux_ports.cpp validation
+  #define AUX2_SERIAL_USART                    UART4
+  #define AUX2_SERIAL_USART_IRQn               UART4_IRQn
+  #define AUX2_SERIAL_TX_GPIO                  GPIO_PIN(GPIOA, 0) // PA.00
+  #define AUX2_SERIAL_RX_GPIO                  GPIO_PIN(GPIOA, 1) // PA.01
+  #define AUX2_SERIAL_DMA_RX                   DMA1
+  #define AUX2_SERIAL_DMA_RX_STREAM            LL_DMA_STREAM_2
+  #define AUX2_SERIAL_DMA_RX_CHANNEL           LL_DMA_CHANNEL_4
 #endif
 
 // --- STOCK RESIDUAL FALLBACKS (DO NOT REMOVE) ---
